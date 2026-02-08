@@ -1,0 +1,525 @@
+:root {
+  /* ★★★ 요청하신 테마 색상 (#1800AD) 적용 ★★★ */
+  --primary: #1800ad; /* 메인 컬러: 딥 인디고 블루 */
+  --primary-dark: #0f007a; /* 버튼 클릭 시: 더 어두운 인디고 */
+  --accent: #fbbf24; /* 포인트: 딥 블루와 잘 어울리는 웜 옐로우 */
+  --text-main: #111827; /* 텍스트: 아주 진한 남색 계열 그레이 */
+  --text-sub: #6b7280; /* 보조 텍스트: 쿨 그레이 */
+  --bg-color: #f5f7ff; /* 배경: 아주 연한 인디고 틴트 */
+  --card-bg: #ffffff;
+  --error: #ef4444; /* 오답/타이머: 레드 */
+  --timer-color: #ef4444;
+  --shadow:
+    0 4px 6px -1px rgba(24, 0, 173, 0.1), 0 2px 4px -1px rgba(24, 0, 173, 0.06);
+  --vh: 1vh; /* JS 연동용 가상 높이 */
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent; /* 터치 시 파란 박스 제거 */
+}
+
+body {
+  font-family: 'Noto Sans KR', 'Noto Sans SC', sans-serif;
+  background-color: #eef2ff;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  height: calc(var(--vh, 1vh) * 100);
+  color: var(--text-main);
+  overflow: hidden;
+}
+
+#app {
+  width: 100%;
+  max-width: 440px;
+  height: 100%;
+  height: calc(var(--vh, 1vh) * 100);
+  background-color: var(--bg-color);
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.screen {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: var(--bg-color);
+  z-index: 1;
+}
+
+#lobby-screen,
+#result-screen {
+  overflow-y: auto;
+}
+
+.active {
+  display: flex !important;
+  z-index: 10;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 1. 로비 화면 */
+#lobby-screen {
+  padding: 25px 20px;
+}
+.logo-area {
+  margin-bottom: 25px;
+}
+.brand-tag {
+  background: var(--primary);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.logo-area h1 {
+  font-size: 1.8rem;
+  margin: 10px 0 5px;
+  line-height: 1.2;
+  color: var(--text-main);
+}
+.logo-area p {
+  color: var(--text-sub);
+  font-size: 0.95rem;
+  margin: 0;
+}
+.stats-bar {
+  background: #fff;
+  padding: 15px;
+  border-radius: 16px;
+  margin-bottom: 25px;
+  box-shadow: var(--shadow);
+}
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.stat-progress {
+  height: 10px;
+  background: #e0e7ff;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.stat-fill {
+  height: 100%;
+  /* [변경] #1800AD 기반 그라데이션 */
+  background: linear-gradient(90deg, var(--primary), #5b40ff);
+  width: 0%;
+  transition: width 0.5s ease;
+}
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  padding-bottom: 40px;
+}
+.theme-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.theme-card:active {
+  transform: scale(0.96);
+}
+.theme-card.cleared {
+  border-color: var(--primary);
+  /* [변경] 클리어 시 배경색 (아주 연한 인디고) */
+  background: #eeedff;
+}
+.theme-icon {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+.theme-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.4;
+  word-break: keep-all;
+}
+.stamp {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 1.2rem;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+.guide-text-area {
+  text-align: center;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px dashed #e0e7ff;
+}
+.guide-highlight {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0 0 5px 0;
+}
+.guide-sub {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+/* 2. 게임 화면 */
+#game-screen {
+  background: #fff;
+  padding: 0;
+  justify-content: space-between;
+  overflow: hidden;
+}
+.timer-container {
+  width: 100%;
+  height: 6px;
+  background: #e5e7eb;
+  position: relative;
+}
+.timer-fill {
+  width: 100%;
+  height: 100%;
+  background-color: var(--timer-color);
+  transform-origin: left;
+}
+.game-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+}
+.icon-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+}
+.stage-info {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--text-main);
+}
+.score-badge {
+  background: var(--bg-color);
+  padding: 5px 12px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--primary);
+}
+.progress-container {
+  width: 100%;
+  height: 4px;
+  background: #f3f4f6;
+}
+.progress-bar {
+  height: 100%;
+  background: var(--primary);
+  width: 0%;
+  transition: width 0.3s;
+}
+
+.card-area {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+.watermark {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--primary);
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 5;
+}
+.flash-card {
+  text-align: center;
+  animation: popIn 0.3s;
+  cursor: pointer;
+  padding: 15px;
+  border-radius: 16px;
+  transition: background-color 0.2s;
+  user-select: none;
+  position: relative;
+  z-index: 10;
+  background: transparent !important;
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.word-ch {
+  font-size: clamp(3.5rem, 12vh, 4.5rem);
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 5px;
+  font-family: 'Noto Sans SC', sans-serif;
+  line-height: 1.1;
+}
+.word-py {
+  font-size: 1.5rem;
+  color: #6b7280;
+  font-weight: 500;
+  opacity: 0;
+  height: 1.8rem;
+}
+.word-py.visible {
+  opacity: 1;
+  transition: all 0.3s ease;
+}
+
+.interaction-area {
+  padding: 0 15px 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.hint-text {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.options-grid {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  height: clamp(100px, 16vh, 130px);
+}
+.option-btn {
+  flex: 1;
+  background: #fff !important;
+  border: 2px solid #e5e7eb !important;
+  color: var(--text-main) !important;
+  padding: 10px;
+  font-size: 1.1rem;
+  border-radius: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.1s;
+  box-shadow: 0 4px 0 #e5e7eb;
+  word-break: keep-all;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  line-height: 1.2;
+  outline: none;
+}
+.option-btn:active {
+  transform: translateY(4px);
+  box-shadow: none;
+  background: #f9fafb !important;
+}
+.option-btn.wrong-anim {
+  animation: shake 0.4s !important;
+  background: var(--error) !important;
+  color: white !important;
+  border-color: var(--error) !important;
+  box-shadow: 0 4px 0 #b91c1c !important;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* 3. 결과 화면 */
+#result-screen {
+  padding: 30px 20px;
+  background: #fff;
+}
+.result-content {
+  text-align: center;
+  margin-top: 20px;
+}
+.result-icon-box {
+  font-size: 4rem;
+  margin-bottom: 15px;
+}
+#res-title {
+  font-size: 1.8rem;
+  margin: 0 0 10px;
+  color: var(--text-main);
+}
+#res-msg {
+  font-size: 1rem;
+  color: var(--text-sub);
+  margin: 0;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+.bottom-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: 20px;
+  padding-bottom: 30px;
+}
+.main-btn {
+  background: var(--primary) !important;
+  color: white !important;
+  padding: 18px;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  /* [변경] 그림자: #1800AD의 반투명 버전 */
+  box-shadow: 0 4px 10px -3px rgba(24, 0, 173, 0.4);
+}
+.sub-btn {
+  background: #fff !important;
+  color: var(--text-sub) !important;
+  border: 2px solid #e5e7eb !important;
+  padding: 16px;
+  border-radius: 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* 프로모션 박스 스타일 (결과화면 전용) */
+.promo-box {
+  display: flex;
+  align-items: center;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 15px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+.promo-box:active {
+  transform: scale(0.98);
+  background-color: #f3f4f6;
+}
+.promo-icon {
+  font-size: 1.8rem;
+  margin-right: 15px;
+  flex-shrink: 0;
+}
+.promo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.promo-text strong {
+  font-size: 0.9rem;
+  color: var(--text-main);
+  line-height: 1.4;
+  word-break: keep-all;
+}
+.promo-text span {
+  font-size: 0.8rem;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* 4. 팝업 모달 스타일 */
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+.modal-content {
+  background: #fff;
+  width: 85%;
+  max-width: 320px;
+  padding: 25px 20px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 5. 오프닝 화면 */
+#opening-screen {
+  padding: 0;
+  cursor: pointer;
+  /* [변경] #1800AD 적용 */
+  background-color: #1800ad;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+}
+#opening-screen:not(.active) {
+  display: none !important;
+}
+.opening-vid {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
