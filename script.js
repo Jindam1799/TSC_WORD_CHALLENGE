@@ -177,20 +177,36 @@ function renderQuestion() {
   let wrongAnswer;
   let attempts = 0;
 
-  // 오답 보기 생성 로직 (데이터가 1개뿐일 경우 무한루프 방지)
-  if (currentTheme.words.length > 1) {
-    do {
-      const randomIdx = Math.floor(Math.random() * currentTheme.words.length);
-      wrongAnswer = currentTheme.words[randomIdx].mean;
-      attempts++;
-    } while (
-      (wrongAnswer === q.mean ||
-        wrongAnswer.includes(q.mean) ||
-        q.mean.includes(wrongAnswer)) &&
-      attempts < 30
+  // [수정됨] 중복 검사 로직 강화
+  do {
+    const randomIdx = Math.floor(Math.random() * currentTheme.words.length);
+    wrongAnswer = currentTheme.words[randomIdx].mean;
+    attempts++;
+
+    // 1. 정답과 오답을 쉼표(,) 기준으로 쪼개서 핵심 단어 배열로 만듭니다.
+    // 예: "약간, 조금" -> ["약간", "조금"]
+    const answerKeywords = q.mean.split(',').map((s) => s.trim());
+
+    // 2. 겹치는 단어가 하나라도 있는지 확인합니다.
+    // "조금, 약간"이라는 오답 안에 "약간"이나 "조금"이 들어있으면 true가 됩니다.
+    const isOverlapping = answerKeywords.some((keyword) =>
+      wrongAnswer.includes(keyword),
     );
-  } else {
-    wrongAnswer = '오답 데이터 부족';
+
+    // 겹치거나 완전히 같으면 다시 뽑습니다 (isOverlapping이 true면 반복)
+    if (isOverlapping || wrongAnswer === q.mean) {
+      wrongAnswer = null; // 조건 불만족 시 초기화하여 루프 유지
+    }
+  } while (
+    !wrongAnswer && // wrongAnswer가 구해지지 않았으면 계속 반복
+    attempts < 30 &&
+    currentTheme.words.length > 1
+  );
+
+  // 만약 30번 시도해도 적절한 오답을 못 찾으면(단어가 너무 비슷하면), 그냥 아무거나 씁니다.
+  if (!wrongAnswer) {
+    const randomIdx = Math.floor(Math.random() * currentTheme.words.length);
+    wrongAnswer = currentTheme.words[randomIdx].mean;
   }
 
   const btn1 = document.getElementById('btn-1');
