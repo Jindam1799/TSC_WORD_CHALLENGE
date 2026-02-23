@@ -523,3 +523,13 @@ body {
   object-fit: contain;
   display: block;
 }
+
+/* 정답 시 초록색 애니메이션 효과 (TSC 버전) */
+.option-btn.correct-anim {
+  background: #10b981 !important;
+  color: white !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 4px 0 #059669 !important;
+  transform: translateY(4px) scale(1.02);
+  transition: all 0.2s ease;
+}
