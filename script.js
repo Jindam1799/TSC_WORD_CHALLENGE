@@ -23,6 +23,13 @@ const startGuideModal = document.getElementById('start-guide-modal');
 const guideStartBtn = document.getElementById('guide-start-btn');
 const guideCloseBtn = document.getElementById('guide-close-btn');
 
+// --- 오디오 객체 생성 추가 ---
+const timerAudio = new Audio('assets/timer.mp3');
+timerAudio.loop = false;
+const correctAudio = new Audio('assets/correct.mp3');
+const wrongAudio = new Audio('assets/wrong.mp3');
+const clearAudio = new Audio('assets/clear.mp3');
+
 // --- 모바일 실제 가시 영역(vh) 계산 ---
 function setScreenSize() {
   let vh = window.innerHeight * 0.01;
@@ -234,10 +241,14 @@ function renderQuestion() {
   }
   startTimer();
 }
-
 function startTimer() {
   timerFill.style.transition = 'none';
   timerFill.style.width = '100%';
+
+  // 타이머 오디오 재생
+  timerAudio.currentTime = 0;
+  timerAudio.play().catch((e) => console.warn('오디오 재생 차단됨:', e));
+
   setTimeout(() => {
     timerFill.style.transition = `width ${TIME_LIMIT}s linear`;
     timerFill.style.width = '0%';
@@ -250,18 +261,50 @@ function startTimer() {
 
 function resetTimer() {
   clearTimeout(timerInterval);
+
+  // 타이머 오디오 정지
+  timerAudio.pause();
+  timerAudio.currentTime = 0;
+
   timerFill.style.transition = 'none';
   timerFill.style.width = '100%';
 }
 
 function handleAnswer(isCorrect, btnElement) {
   resetTimer();
+
+  // 1. 중복 클릭 방지를 위해 잠시 모든 버튼 클릭 막기
+  const allBtns = document.querySelectorAll('.option-btn');
+  allBtns.forEach((btn) => (btn.style.pointerEvents = 'none'));
+
+  // 2. 선택 직후 병음 자동 노출 (학습 효과)
+  document.getElementById('q-pinyin').classList.add('visible');
+
   if (isCorrect) {
-    currentIndex++;
-    renderQuestion();
+    // 정답 사운드 재생
+    correctAudio.currentTime = 0;
+    correctAudio.play().catch((e) => console.warn('오디오 재생 차단됨:', e));
+
+    // 정답 시각적 피드백
+    btnElement.classList.add('correct-anim');
+
+    setTimeout(() => {
+      currentIndex++;
+      allBtns.forEach((btn) => (btn.style.pointerEvents = 'auto'));
+      renderQuestion();
+    }, 400);
   } else {
+    // 오답 사운드 재생
+    wrongAudio.currentTime = 0;
+    wrongAudio.play().catch((e) => console.warn('오디오 재생 차단됨:', e));
+
+    // 오답 시각적 피드백
     btnElement.classList.add('wrong-anim');
-    setTimeout(() => endGame(false), 400);
+
+    setTimeout(() => {
+      allBtns.forEach((btn) => (btn.style.pointerEvents = 'auto'));
+      endGame(false);
+    }, 400);
   }
 }
 
@@ -273,12 +316,16 @@ function endGame(isSuccess, reason = '') {
   const msg = document.getElementById('res-msg');
 
   if (isSuccess) {
+    // 올클리어 사운드 재생
+    clearAudio.currentTime = 0;
+    clearAudio.play().catch((e) => console.warn('오디오 재생 차단됨:', e));
+
     icon.innerText = '👑';
     title.innerText = '테마 정복 완료!';
     title.style.color = 'var(--primary)';
     msg.innerText = `${currentQuestions.length}문제를 모두 맞추셨어요!`;
 
-    // [변경] TSC 정복 기록 저장
+    // TSC 정복 기록 저장
     const clearedData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     if (!clearedData.includes(currentTheme.id)) {
       clearedData.push(currentTheme.id);
