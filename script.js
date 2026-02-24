@@ -292,7 +292,7 @@ function handleAnswer(isCorrect, btnElement) {
       currentIndex++;
       allBtns.forEach((btn) => (btn.style.pointerEvents = 'auto'));
       renderQuestion();
-    }, 400);
+    }, 800);
   } else {
     // 오답 사운드 재생
     wrongAudio.currentTime = 0;
@@ -304,7 +304,7 @@ function handleAnswer(isCorrect, btnElement) {
     setTimeout(() => {
       allBtns.forEach((btn) => (btn.style.pointerEvents = 'auto'));
       endGame(false);
-    }, 400);
+    }, 800);
   }
 }
 
